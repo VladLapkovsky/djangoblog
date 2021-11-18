@@ -1,0 +1,32 @@
+a.title__link {
+  color: #000000;
+}
+
+posts__container {
+}
+
+.post__main {
+    margin-top: 16px;
+    padding-right: 8px;
+}
+
+.post__header {
+    margin-bottom: 16px;
+}
+
+.post__user__info {
+    margin-bottom: 12px;
+    display: flex;
+}
+
+.post__user__nickname {
+    padding-right: 8px;
+}
+
+.post__footer {
+    display: flex;
+}
+
+.post__rating {
+    padding-right: 8px;
+}

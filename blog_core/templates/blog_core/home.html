@@ -1,0 +1,33 @@
+{% extends "layout/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 border-bottom">
+    <h1 class="h2">Posts</h1>
+</div>
+<div class="posts__container">
+    {% for post in posts %}
+        <div class="post__main border-bottom">
+            <header class="post__header">
+                <div class="post__user__info">
+                    <a href="/@{{ post.author }}" class="post__user__nickname">
+                        {{ post.author }}
+                    </a>
+                    <div>
+                        <time datetime="{{ post.published|date:'d.m.Y H:i:s' }}">{{ post.published|date:'d.m.Y H:i:s' }}</time>
+                    </div>
+                </div>
+                <h3 class="post__title">
+                    <a href="{% url 'post' post.slug %}" class="title__link">{{ post.title }}</a>
+                </h3>
+            </header>
+            <div class="post__content">
+                <p>{{ post.content }}</p>
+            </div>
+            <div class="post__footer">
+                <p class="post__rating">Rating: {{ post.rating }}</p>
+                <p>Comments: 0</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

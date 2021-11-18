@@ -116,3 +116,7 @@ GitHub.sublime-settings
 .history
 
 credits.py
+
+.idea
+.idea/
+.pylintrc

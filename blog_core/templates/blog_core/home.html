@@ -25,7 +25,7 @@
             </div>
             <div class="post__footer">
                 <p class="post__rating">Rating: {{ post.rating }}</p>
-                <p>Comments: 0</p>
+                <p>Comments: {{ post.comment__count }}</p>
             </div>
         </div>
     {% endfor %}

@@ -15,7 +15,7 @@ posts__container {
 }
 
 .post__user__info {
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     display: flex;
 }
 
@@ -29,4 +29,8 @@ posts__container {
 
 .post__rating {
     padding-right: 8px;
+}
+
+.comments__container {
+    padding-top: 16px;
 }

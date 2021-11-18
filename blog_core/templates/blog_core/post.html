@@ -1,5 +1,10 @@
 {% extends "layout/base.html" %}
 
+{% block title %}
+{{ post.title }}
+{% endblock %}
+
+
 {% block content %}
 <div class="post__main border-bottom">
     <header class="post__header">
@@ -20,7 +25,25 @@
     </div>
     <div class="post__footer">
         <p class="post__rating">Rating: {{ post.rating }}</p>
-        <p>Comments: 0</p>
+        <p>Comments: {{ comments|length }}</p>
     </div>
+    {% for comment in comments %}
+    <div class="comments__container border-top">
+        <div class="post__user__info">
+            <a href="/@{{ post.author }}" class="post__user__nickname">
+                {{ post.author }}
+            </a>
+            <div>
+                <time datetime="{{ comment.published|date:'d.m.Y H:i:s' }}">{{ comment.published|date:'d.m.Y H:i:s' }}</time>
+            </div>
+        </div>
+        <div class="post__content">
+            <p>{{ comment.content }}</p>
+        </div>
+        <div class="post__footer">
+            <p class="post__rating">Comment rating: {{ comment.rating }}</p>
+        </div>
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}

@@ -1,5 +1,11 @@
 a.title__link {
-  color: #000000;
+    color: #000000;
+    text-decoration: none;
+}
+
+a:hover.title__link {
+    color: #000000;
+    text-decoration: underline;
 }
 
 posts__container {

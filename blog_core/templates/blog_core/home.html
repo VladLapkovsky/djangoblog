@@ -13,15 +13,15 @@
                         {{ post.author }}
                     </a>
                     <div>
-                        <time datetime="{{ post.published|date:'d.m.Y H:i:s' }}">{{ post.published|date:'d.m.Y H:i:s' }}</time>
+                        <time datetime="{{ post.published|date:'d.m.Y H:i:s' }}">{{ post.published|timesince }} ago</time>
                     </div>
                 </div>
                 <h3 class="post__title">
-                    <a href="{% url 'post' post.slug %}" class="title__link">{{ post.title }}</a>
+                    <a href="{{ post.get_absolute_url }}" class="title__link">{{ post.title }}</a>
                 </h3>
             </header>
             <div class="post__content">
-                <p>{{ post.content }}</p>
+                <p>{{ post.content|linebreaks|truncatewords:50 }}</p>
             </div>
             <div class="post__footer">
                 <p class="post__rating">Rating: {{ post.rating }}</p>

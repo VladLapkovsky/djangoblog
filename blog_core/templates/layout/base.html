@@ -8,10 +8,10 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{% block title %}Pretty blog{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'blog_core/style.css' %}" type="text/css">
     <link href="https://getbootstrap.com/docs/5.1/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
           crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'blog_core/style.css' %}" type="text/css">
     {% block head %}
     {% endblock %}
 </head>
@@ -35,9 +35,13 @@
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a href="{% url 'home' %}" class="nav-link active" aria-current="page">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                            <a href="{% url 'home' %}" class="nav-link">
                               Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'add_post' %}" class="nav-link">
+                              Add post
                             </a>
                         </li>
                     </ul>

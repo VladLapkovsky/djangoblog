@@ -9,11 +9,6 @@ TITLE_WIDGET = forms.TextInput(
         'placeholder': 'Title example',
     },
 )
-SLUG_WIDGET = forms.TextInput(
-    attrs={
-        'placeholder': 'your-post-url',
-    },
-)
 CONTENT_WIDGET = forms.Textarea(
     attrs={
         'placeholder': 'Hello world!',
@@ -29,10 +24,9 @@ class AddPostForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        fields = ['title', 'slug', 'content', 'author']
+        fields = ['title', 'content', 'author']
         widgets = {
             'title': TITLE_WIDGET,
-            'slug': SLUG_WIDGET,
             'content': CONTENT_WIDGET,
         }
 

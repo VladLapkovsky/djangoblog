@@ -5,20 +5,24 @@ from django.views.generic import CreateView, DetailView, ListView
 
 from blog_core.forms import AddPostForm
 from blog_core.models import Comment, Post
-
+from blog_core.utils import DataMixin
 # TODO remove comments
 
 
-class BlogHome(ListView):
+class BlogHome(DataMixin, ListView):
     model = Post
     template_name = 'blog_core/home.html'
     context_object_name = 'posts'
     # extra_context = {'title': 'Pretty blog'}
 
     def get_context_data(self, *, object_list=None, **kwargs):
+        # TODO discuss about common strings like context = super()..., how to replace them to the mixins
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Pretty blog'
-        return context
+        # context['title'] = 'Pretty blog'
+        extra_context = self.get_user_context(
+            title='Pretty blog',
+        )
+        return context | extra_context
 
     def get_queryset(self):
         return Post.objects.annotate(Count('comment')).order_by('-published')
@@ -34,17 +38,21 @@ class BlogHome(ListView):
 #     )
 
 
-class SinglePost(DetailView):
+class SinglePost(DataMixin, DetailView):
     model = Post
     template_name = 'blog_core/post.html'
     slug_url_kwarg = 'post_slug'
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        # TODO discuss
+
+        # TODO discuss about effectiveness
         # context['comments'] = Comment.objects.filter(post__slug=self.kwargs['post_slug']).order_by('published')
-        context['comments'] = Comment.objects.filter(post=context['post'].pk).order_by('published')
-        return context
+        # context['comments'] = Comment.objects.filter(post=context['post'].pk).order_by('published')
+        extra_context = self.get_user_context(
+            comments=Comment.objects.filter(post__slug=self.kwargs['post_slug']).order_by('published'),
+        )
+        return context | extra_context
 
 
 # def show_post(request, post_slug):
@@ -63,10 +71,17 @@ def get_slug_from_title(title: str) -> str:
     return title.strip('*!., ').lower().replace(' ', '-')
 
 
-class AddPostPage(CreateView):
+class AddPostPage(DataMixin, CreateView):
     form_class = AddPostForm
     template_name = 'blog_core/add_post.html'
     success_url = reverse_lazy('home')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        extra_context = self.get_user_context(
+            title='Add post to blog',
+        )
+        return context | extra_context
 
     def form_valid(self, form):
         title = form.cleaned_data['title']

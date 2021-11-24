@@ -12,6 +12,7 @@ from blog_core.utils import DataMixin
 
 
 class BlogHome(DataMixin, ListView):
+    paginate_by = 3
     model = Post
     template_name = 'blog_core/home.html'
     context_object_name = 'posts'

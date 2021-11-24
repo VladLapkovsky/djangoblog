@@ -31,7 +31,7 @@
     <div class="comments__container border-top">
         <div class="post__user__info">
             <a href="/@{{ post.author }}" class="post__user__nickname">
-                {{ post.author }}
+                {{ comment.author }}
             </a>
             <div>
                 <time datetime="{{ comment.published|date:'d.m.Y H:i:s' }}">{{ comment.published|date:'d.m.Y H:i:s' }}</time>

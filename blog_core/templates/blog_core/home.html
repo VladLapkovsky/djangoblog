@@ -1,8 +1,12 @@
 {% extends "layout/base.html" %}
 
+{% block title %}
+{{ title }}
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 border-bottom">
-    <h1 class="h2">Posts</h1>
+    <h2>Posts</h2>
 </div>
 <div class="posts__container">
     {% for post in posts %}
@@ -13,7 +17,7 @@
                         {{ post.author }}
                     </a>
                     <div>
-                        <time datetime="{{ post.published|date:'d.m.Y H:i:s' }}">{{ post.published|timesince }} ago</time>
+                        <time datetime="{{ post.published|date:'d.m.Y H:i:s' }}">Published {{ post.published|timesince }} ago</time>
                     </div>
                 </div>
                 <h3 class="post__title">

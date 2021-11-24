@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -6,6 +7,7 @@ from django.views.generic import CreateView, DetailView, ListView
 from blog_core.forms import AddPostForm
 from blog_core.models import Comment, Post
 from blog_core.utils import DataMixin
+
 # TODO remove comments
 
 
@@ -13,12 +15,9 @@ class BlogHome(DataMixin, ListView):
     model = Post
     template_name = 'blog_core/home.html'
     context_object_name = 'posts'
-    # extra_context = {'title': 'Pretty blog'}
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        # TODO discuss about common strings like context = super()..., how to replace them to the mixins
         context = super().get_context_data(**kwargs)
-        # context['title'] = 'Pretty blog'
         extra_context = self.get_user_context(
             title='Pretty blog',
         )
@@ -45,12 +44,8 @@ class SinglePost(DataMixin, DetailView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        # TODO discuss about effectiveness
-        # context['comments'] = Comment.objects.filter(post__slug=self.kwargs['post_slug']).order_by('published')
-        # context['comments'] = Comment.objects.filter(post=context['post'].pk).order_by('published')
         extra_context = self.get_user_context(
-            comments=Comment.objects.filter(post__slug=self.kwargs['post_slug']).order_by('published'),
+            comments=Comment.objects.filter(post=context['post'].pk).order_by('published')
         )
         return context | extra_context
 
@@ -71,10 +66,11 @@ def get_slug_from_title(title: str) -> str:
     return title.strip('*!., ').lower().replace(' ', '-')
 
 
-class AddPostPage(DataMixin, CreateView):
+class AddPostPage(LoginRequiredMixin, DataMixin, CreateView):
     form_class = AddPostForm
     template_name = 'blog_core/add_post.html'
     success_url = reverse_lazy('home')
+    login_url = '/admin/'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -87,15 +83,6 @@ class AddPostPage(DataMixin, CreateView):
         title = form.cleaned_data['title']
         form.instance.slug = get_slug_from_title(title=title)
         return super().form_valid(form)
-
-    # def get_context_data(self, *, object_list=None, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     request = self.request
-    #     print("request ===>", request.__dict__)
-    #     # print("request title ===>", request['_post']['title'])
-    #     print("context ==>", context)
-    #     # context['slug'] = Comment.objects.filter(post=context['post'].pk).order_by('published')
-    #     return context
 
 
 # def add_post(request):

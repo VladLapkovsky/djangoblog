@@ -32,6 +32,11 @@ class AddPostForm(forms.ModelForm):
 
     def clean_title(self):
         title = self.cleaned_data['title']
+        if Post.objects.filter(title=title).exists():
+            raise ValidationError('The post with this title is already exists. Try another one.')
         if len(title) > 200:
-            raise ValidationError('The title is longer than 200 characters')
+            raise ValidationError('The title is longer than 200 characters.')
         return title
+
+    def clean_context(self):
+        pass

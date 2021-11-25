@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "debug_toolbar",
+    'debug_toolbar',
+    'captcha',
     'users.apps.UsersConfig',
     'blog_core.apps.BlogCoreConfig',
 ]
@@ -150,3 +151,7 @@ CACHES = {
         'LOCATION': os.path.join(BASE_DIR, 'djangoblog_cache')
     }
 }
+
+CAPTCHA_IMAGE_SIZE = [200, 100]
+CAPTCHA_FONT_SIZE = 30
+

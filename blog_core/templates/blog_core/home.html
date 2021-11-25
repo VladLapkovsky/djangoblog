@@ -1,9 +1,10 @@
 {% extends "layout/base.html" %}
-
+{% load cache %}
 {% block title %}
 {{ title }}
 {% endblock %}
 
+{% cache 60 home_page %}
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 border-bottom">
     <h2>Posts</h2>
@@ -35,3 +36,5 @@
     {% endfor %}
 </div>
 {% endblock %}
+{% endcache %}
+

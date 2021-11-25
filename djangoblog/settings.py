@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import os.path
 from pathlib import Path
 
 from .credits import PROJECT_SECRET_KEY, NAME, USER, PASSWORD, HOST, PORT
@@ -143,3 +143,10 @@ INTERNAL_IPS = [
 ]
 
 LOGIN_REDIRECT_URL = '/'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'djangoblog_cache')
+    }
+}

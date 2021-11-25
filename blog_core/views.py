@@ -12,7 +12,7 @@ from blog_core.utils import DataMixin
 
 
 class BlogHome(DataMixin, ListView):
-    paginate_by = 3
+    paginate_by = 40
     model = Post
     template_name = 'blog_core/home.html'
     context_object_name = 'posts'
@@ -25,7 +25,7 @@ class BlogHome(DataMixin, ListView):
         return context | extra_context
 
     def get_queryset(self):
-        return Post.objects.annotate(Count('comment')).order_by('-published')
+        return Post.objects.annotate(Count('comment')).order_by('-published').select_related('author')
 
 
 class SinglePost(DataMixin, DetailView):
@@ -36,9 +36,12 @@ class SinglePost(DataMixin, DetailView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         extra_context = self.get_user_context(
-            comments=Comment.objects.filter(post=context['post'].pk).order_by('published')
+            comments=Comment.objects.filter(post=context['post'].pk).order_by('published').select_related('author')
         )
         return context | extra_context
+
+    def get_queryset(self):
+        return Post.objects.filter(slug=self.kwargs['post_slug']).select_related('author')
 
 
 def get_slug_from_title(title: str) -> str:

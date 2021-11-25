@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from blog_core.forms import AddPostForm
+from blog_core.forms import AddPostForm, RegisterUserForm
 from blog_core.models import Comment, Post
 from blog_core.utils import DataMixin
 
@@ -103,3 +103,15 @@ class AddPostPage(LoginRequiredMixin, DataMixin, CreateView):
 #         template_name=path,
 #         context=context,
 #     )
+
+class RegisterUser(DataMixin, CreateView):
+    form_class = RegisterUserForm
+    template_name = 'blog_core/register.html'
+    success_url = reverse_lazy('login')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        extra_context = self.get_user_context(
+            title='Register',
+        )
+        return context | extra_context

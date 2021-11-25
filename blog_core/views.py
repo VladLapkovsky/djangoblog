@@ -1,12 +1,14 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
+from django.core.paginator import Paginator
 from django.db.models import Count
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.edit import FormMixin
+from django.views.generic.list import MultipleObjectMixin
 
 from blog_core.forms import AddPostForm, LoginUserForm, RegisterUserForm, CommentForm
 from blog_core.models import Comment, Post
@@ -15,7 +17,7 @@ from users.models import CustomUser
 
 
 class BlogHome(DataMixin, ListView):
-    paginate_by = 40
+    paginate_by = 3
     model = Post
     template_name = 'blog_core/home.html'
     context_object_name = 'posts'
@@ -36,13 +38,17 @@ class SinglePost(DataMixin, DetailView, FormMixin):
     template_name = 'blog_core/post.html'
     slug_url_kwarg = 'post_slug'
     form_class = CommentForm
+    comments_per_page = 3
 
-    def get_context_data(self, *, object_list=None, **kwargs):
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         extra_context = self.get_user_context(
             comments=Comment.objects.filter(post=context['post'].pk).order_by('published').select_related('author')
         )
-        return context | extra_context
+        paginator = Paginator(extra_context['comments'], self.comments_per_page)
+        page = self.request.GET.get('page')
+        context['comments'] = paginator.get_page(page)
+        return context
 
     def get_queryset(self):
         return Post.objects.filter(slug=self.kwargs['post_slug']).select_related('author')
@@ -57,7 +63,7 @@ class SinglePost(DataMixin, DetailView, FormMixin):
                 author=CustomUser.objects.get(id=self.request.user.id),
                 content=data['content'],
             )
-            return HttpResponseRedirect(self.request.path_info)
+            return HttpResponseRedirect(self.request.get_full_path())
         return render(request, self.template_name, {'form': form})
 
 

@@ -1,7 +1,8 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 
-from blog_core.models import Post
+from blog_core.models import CustomUser, Post
 
 CONTENT_AREA_CLASS = 'form-control'
 TITLE_WIDGET = forms.TextInput(
@@ -24,7 +25,7 @@ class AddPostForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        fields = ['title', 'content', 'author']
+        fields = ('title', 'content', 'author')
         widgets = {
             'title': TITLE_WIDGET,
             'content': CONTENT_WIDGET,
@@ -38,5 +39,25 @@ class AddPostForm(forms.ModelForm):
             raise ValidationError('The title is longer than 200 characters.')
         return title
 
-    def clean_context(self):
-        pass
+
+class RegisterUserForm(UserCreationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = CONTENT_AREA_CLASS
+
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'email', 'password1', 'password2')
+
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if CustomUser.objects.filter(username=username).exists():
+            raise ValidationError('The user with this name is already exists. Try another one.')
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if CustomUser.objects.filter(email=email).exists():
+            raise ValidationError('The user with this email is already exists. Try another one.')
+        return email

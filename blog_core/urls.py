@@ -1,11 +1,11 @@
 from django.urls import path
 
-from blog_core.views import AddPostPage
-from blog_core.views import BlogHome
-from blog_core.views import SinglePost
+from blog_core.views import AddPostPage, BlogHome, RegisterUser, SinglePost
 
 urlpatterns = [
+    path('', BlogHome.as_view(), name='home'),
+    path('register/', RegisterUser.as_view(), name='register'),
+    path('login/', AddPostPage.as_view(), name='login'),
     path('add-post/', AddPostPage.as_view(), name='add_post'),
     path('<slug:post_slug>/', SinglePost.as_view(), name='post'),
-    path('', BlogHome.as_view(), name='home'),
 ]

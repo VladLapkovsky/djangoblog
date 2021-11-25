@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 
 from blog_core.models import CustomUser, Post
@@ -61,3 +61,10 @@ class RegisterUserForm(UserCreationForm):
         if CustomUser.objects.filter(email=email).exists():
             raise ValidationError('The user with this email is already exists. Try another one.')
         return email
+
+
+class LoginUserForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = CONTENT_AREA_CLASS

@@ -23,10 +23,18 @@
         </button>
         <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
         <div class="navbar-nav">
+            {% if request.user.is_authenticated %}
+            <div class="nav-item text-nowrap d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
+                <span class="nav-link px-3">Hello, {{ user.username }}</span>
+                <a class="nav-link px-3" href="{% url 'logout' %}">Log out</a>
+            </div>
+            {% else %}
             <div class="nav-item text-nowrap d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
                 <a class="nav-link px-3" href="{% url 'login' %}">Log in</a>
                 <a class="nav-link px-3" href="{% url 'register' %}">Sign in</a>
             </div>
+            {% endif %}
+
         </div>
     </header>
     <div class="container-fluid">

@@ -1,11 +1,11 @@
-from captcha.fields import CaptchaField
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.exceptions import ValidationError
+from captcha.fields import CaptchaField
 
 from blog_core.models import CustomUser, Post
+from blog_core.utils import FormStyleClass
 
-CONTENT_AREA_CLASS = 'form-control'
 TITLE_WIDGET = forms.TextInput(
     attrs={
         'placeholder': 'Title example',
@@ -18,12 +18,7 @@ CONTENT_WIDGET = forms.Textarea(
 )
 
 
-class AddPostForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for visible in self.visible_fields():
-            visible.field.widget.attrs['class'] = CONTENT_AREA_CLASS
-
+class AddPostForm(FormStyleClass, forms.ModelForm):
     class Meta:
         model = Post
         fields = ('title', 'content', 'author')
@@ -41,13 +36,8 @@ class AddPostForm(forms.ModelForm):
         return title
 
 
-class RegisterUserForm(UserCreationForm):
+class RegisterUserForm(FormStyleClass, UserCreationForm):
     captcha = CaptchaField()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for visible in self.visible_fields():
-            visible.field.widget.attrs['class'] = CONTENT_AREA_CLASS
 
     class Meta:
         model = CustomUser
@@ -66,8 +56,5 @@ class RegisterUserForm(UserCreationForm):
         return email
 
 
-class LoginUserForm(AuthenticationForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for visible in self.visible_fields():
-            visible.field.widget.attrs['class'] = CONTENT_AREA_CLASS
+class LoginUserForm(FormStyleClass, AuthenticationForm):
+    pass

@@ -21,7 +21,7 @@ CONTENT_WIDGET = forms.Textarea(
 class AddPostForm(FormStyleClass, forms.ModelForm):
     class Meta:
         model = Post
-        fields = ('title', 'content', 'author')
+        fields = ('title', 'content',)
         widgets = {
             'title': TITLE_WIDGET,
             'content': CONTENT_WIDGET,
@@ -66,6 +66,7 @@ COMMENT_WIDGET = forms.Textarea(
         'rows': 3,
     },
 )
+
 
 class CommentForm(FormStyleClass, forms.ModelForm):
     class Meta:

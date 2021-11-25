@@ -81,6 +81,7 @@ class AddPostPage(LoginRequiredMixin, DataMixin, CreateView):
     def form_valid(self, form):
         title = form.cleaned_data['title']
         form.instance.slug = get_slug_from_title(title=title)
+        form.instance.author = CustomUser.objects.get(id=self.request.user.id)
         return super().form_valid(form)
 
 

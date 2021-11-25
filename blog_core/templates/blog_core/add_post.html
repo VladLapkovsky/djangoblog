@@ -6,10 +6,6 @@
 
 {% block content %}
 <div class="post__main">
-<!--{% if not user.is_authenticated %}-->
-<!--    <p class="post__header">Welcome, user. Please log in or sign in to continue.</p>-->
-<!--{% else %}-->
-<!--    <p class="post__header">Welcome, {{ user.username }}. Thanks for logging in.</p>-->
     <h2 class="post__header">Add post</h2>
     <form action="{% url 'add_post' %}" method="post">
         {% csrf_token %}
@@ -30,6 +26,5 @@
         <hr class="my-4">
         <button class="w-100 btn btn-primary btn-lg" type="submit">Publish post</button>
     </form>
-<!--{% endif %}-->
 </div>
 {% endblock %}

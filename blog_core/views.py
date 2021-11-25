@@ -2,13 +2,16 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.db.models import Count
-from django.shortcuts import redirect
-from django.urls import reverse_lazy
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect, render, get_object_or_404
+from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, DetailView, ListView
+from django.views.generic.edit import FormMixin
 
-from blog_core.forms import AddPostForm, LoginUserForm, RegisterUserForm
+from blog_core.forms import AddPostForm, LoginUserForm, RegisterUserForm, CommentForm
 from blog_core.models import Comment, Post
 from blog_core.utils import DataMixin
+from users.models import CustomUser
 
 
 class BlogHome(DataMixin, ListView):
@@ -28,10 +31,11 @@ class BlogHome(DataMixin, ListView):
         return Post.objects.annotate(Count('comment')).order_by('-published').select_related('author')
 
 
-class SinglePost(DataMixin, DetailView):
+class SinglePost(DataMixin, DetailView, FormMixin):
     model = Post
     template_name = 'blog_core/post.html'
     slug_url_kwarg = 'post_slug'
+    form_class = CommentForm
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -42,6 +46,19 @@ class SinglePost(DataMixin, DetailView):
 
     def get_queryset(self):
         return Post.objects.filter(slug=self.kwargs['post_slug']).select_related('author')
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            post = get_object_or_404(Post, slug=self.kwargs['post_slug'])
+            Comment.objects.create(
+                post=post,
+                author=CustomUser.objects.get(id=self.request.user.id),
+                content=data['content'],
+            )
+            return HttpResponseRedirect(self.request.path_info)
+        return render(request, self.template_name, {'form': form})
 
 
 def get_slug_from_title(title: str) -> str:

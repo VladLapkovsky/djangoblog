@@ -3,7 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.exceptions import ValidationError
 from captcha.fields import CaptchaField
 
-from blog_core.models import CustomUser, Post
+from blog_core.models import Comment, CustomUser, Post
 from blog_core.utils import FormStyleClass
 
 TITLE_WIDGET = forms.TextInput(
@@ -58,3 +58,19 @@ class RegisterUserForm(FormStyleClass, UserCreationForm):
 
 class LoginUserForm(FormStyleClass, AuthenticationForm):
     pass
+
+
+COMMENT_WIDGET = forms.Textarea(
+    attrs={
+        'placeholder': 'Leave your comment',
+        'rows': 3,
+    },
+)
+
+class CommentForm(FormStyleClass, forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ('content', )
+        widgets = {
+            'content': COMMENT_WIDGET,
+        }

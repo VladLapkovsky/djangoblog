@@ -1,16 +1,41 @@
+"""This module provides custom mixins for the blog_core app.
+
+Mixins:
+DataMixin - could be used to add common arguments to all inherited classes.
+FormStyleClassMixin - add CONTENT_AREA_CLASS to all inherited classes.
+"""
+
 from django import forms
 
 
 class DataMixin:
-    def get_user_context(self, **kwargs):
+    """Provide additional logic to all inherited classes."""
+
+    def get_user_context(self, **kwargs: dict) -> dict:
+        """Could be used to add common arguments to all inherited classes.
+
+        Args:
+            **kwargs: context kwargs
+
+        Returns:
+            kwargs
+        """
         return kwargs
 
 
 CONTENT_AREA_CLASS = 'form-control'
 
 
-class FormStyleClass(forms.Form):
-    def __init__(self, *args, **kwargs):
+class FormStyleClassMixin(forms.Form):
+    """Provide constructor to all inherited classes."""
+
+    def __init__(self, *args: tuple, **kwargs: dict):
+        """Add common widget class to all inherited classes.
+
+        Args:
+            *args: constructor args
+            **kwargs: constructor kwargs
+        """
         super().__init__(*args, **kwargs)
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = CONTENT_AREA_CLASS

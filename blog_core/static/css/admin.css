@@ -1,0 +1,16 @@
+#header, .module caption, #header a:link, #header a:visited, div.breadcrumbs {
+    background: #ffc0cb;
+    color: black;
+}
+
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+    color: black;
+}
+
+#user-tools a {
+    border-bottom: 1px solid rgb(0, 0, 0);
+}
+
+a.section:link, a.section:visited {
+    color: black;
+}

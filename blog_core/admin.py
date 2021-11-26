@@ -18,3 +18,6 @@ class CommentAdmin(admin.ModelAdmin):
 
 admin.site.register(Post, PostAdmin)
 admin.site.register(Comment, CommentAdmin)
+
+admin.site.site_title = 'Pretty Blog administration'
+admin.site.site_header = 'Pretty Blog administration'

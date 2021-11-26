@@ -25,8 +25,33 @@
     </div>
     <div class="post__footer">
         <p class="post__rating">Rating: {{ post.rating }}</p>
-        <p>Comments: {{ comments|length }}</p>
+        <p>Comments: {{ comments.paginator.count }}</p>
     </div>
+    {% if user.is_authenticated %}
+    <div class="post__main">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="form-error">
+                    {{ form.non_field_errors }}
+                </div>
+                {% for form_field in form %}
+                <div class="col-12">
+                    <label for="{{ form_field.id_for_label }}" class="form-label"></label>
+                    {{ form_field }}
+                    <div class="form-error">
+                        {{ form_field.errors }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="w-100 btn btn-primary btn-lg mt-2 mb-2" type="submit">Publish comment</button>
+        </form>
+    </div>
+    {% endif %}
+    <h4 class="post__title">
+        Comments:
+    </h4>
     {% for comment in comments %}
     <div class="comments__container border-top">
         <div class="post__user__info">
@@ -45,5 +70,58 @@
         </div>
     </div>
     {% endfor %}
+    {% if comments.has_other_pages %}
+    <nav aria-label="pagination">
+        <ul class="pagination mt-3">
+            {% if comments.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ comments.previous_page_number }}">
+                    Previous
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page=1">
+                    1
+                </a>
+            </li>
+            {% endif %}
+            {% if comments.number|add:-2 > 2 %}
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+            {% endif %}
+            {% for page_number in comments.paginator.page_range %}
+            {% if comments.number ==  page_number %}
+            <li class="page-item disabled">
+                <span class="page-link">{{ page_number }}</span>
+            </li>
+            {% elif page_number >= comments.number|add:-2 and page_number <= comments.number|add:2 and page_number != 1 and page_number != comments.paginator.num_pages %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_number }}">
+                    {{ page_number }}
+                </a>
+            </li>
+            {% endif %}
+            {% endfor %}
+            {% if comments.number|add:3 < comments.paginator.num_pages %}
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+            {% endif %}
+            {% if comments.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ comments.paginator.num_pages }}">
+                    {{ comments.paginator.num_pages }}
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ comments.next_page_number }}">
+                    Next
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
 </div>
 {% endblock %}

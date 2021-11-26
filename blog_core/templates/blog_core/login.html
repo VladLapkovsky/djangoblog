@@ -6,11 +6,11 @@
 
 {% block content %}
 <div class="post__main">
-    <h2 class="post__header">Add post</h2>
-    <form action="{% url 'add_post' %}" method="post">
+    <h2 class="post__header">Log in</h2>
+    <form method="post">
         {% csrf_token %}
         <div class="row g-3">
-            <div class="form-error">
+            <div class="form-error mt-3">
                 {{ form.non_field_errors }}
             </div>
             {% for form_field in form %}
@@ -24,7 +24,9 @@
             {% endfor %}
         </div>
         <hr class="my-4">
-        <button class="w-100 btn btn-primary btn-lg" type="submit">Publish post</button>
+        <span>Not registered? Click <a href="{% url 'register' %}">Sign in</a>.</span>
+        <hr class="my-4">
+        <button class="w-100 btn btn-primary btn-lg" type="submit">Log in</button>
     </form>
 </div>
 {% endblock %}

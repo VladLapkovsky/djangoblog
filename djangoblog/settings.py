@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import os.path
 from pathlib import Path
 
 from .credits import PROJECT_SECRET_KEY, NAME, USER, PASSWORD, HOST, PORT
@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "debug_toolbar",
+    'debug_toolbar',
+    'captcha',
     'users.apps.UsersConfig',
     'blog_core.apps.BlogCoreConfig',
 ]
@@ -141,3 +142,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
+
+LOGIN_REDIRECT_URL = '/'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'djangoblog_cache')
+    }
+}
+
+CAPTCHA_IMAGE_SIZE = [200, 100]
+CAPTCHA_FONT_SIZE = 30
+

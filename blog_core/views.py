@@ -7,6 +7,7 @@ AddPostPage - provides view for the add post page.
 RegisterUser - provides view for the user register page.
 LoginUser - provides view for the user log in page.
 logout_user - provides user logout logic.
+UserPage - provides view for the user page.
 """
 from typing import Union
 
@@ -234,3 +235,44 @@ def logout_user(request: WSGIRequest) -> HttpResponseRedirect:
     """
     logout(request)
     return redirect(request.GET['next'])
+
+
+class UserPage(DataMixin, ListView):
+    """Provide view for the user page."""
+
+    paginate_by = 4
+    model = Post
+    template_name = 'blog_core/user_page.html'
+    context_object_name = 'posts'
+
+    def get_context_data(self, *, object_list=None, **kwargs: dict) -> dict:
+        """Provide additional args to the user page template.
+
+        Add user info.
+
+        Args:
+            object_list: context kwargs
+            **kwargs: context kwargs
+
+        Returns:
+            args for the user page template
+        """
+        context = super().get_context_data(object_list=object_list, **kwargs)
+        extra_context = self.get_user_context(
+            author=self.author_fields,
+        )
+
+        return context | extra_context
+
+    def get_queryset(self) -> QuerySet:
+        """Form posts list for the specific user, add comment column to this posts.
+
+        Create self.author_fields class parameter to avoid duplicates in sql queries.
+
+        Returns:
+            Posts QuerySet
+        """
+        self.author_fields = CustomUser.objects.get(username=self.kwargs['author'])
+        return Post.objects.filter(
+            author=self.author_fields,
+        ).annotate(Count('comment')).order_by('-published').select_related('author')

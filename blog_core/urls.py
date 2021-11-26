@@ -1,3 +1,5 @@
+"""blog_core URL configuration."""
+
 from django.urls import path
 
 from blog_core.views import AddPostPage, BlogHome, LoginUser, logout_user, RegisterUser, SinglePost

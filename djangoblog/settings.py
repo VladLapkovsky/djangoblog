@@ -9,10 +9,10 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-import os.path
+import os
 from pathlib import Path
 
-from .credits import PROJECT_SECRET_KEY, NAME, USER, PASSWORD, HOST, PORT
+from djangoblog.credits import PROJECT_SECRET_KEY, NAME, USER, PASSWORD, HOST, PORT
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -55,7 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'djangoblog.urls'
@@ -63,8 +63,7 @@ ROOT_URLCONF = 'djangoblog.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -91,9 +90,8 @@ DATABASES = {
         'PASSWORD': PASSWORD,
         'HOST': HOST,
         'PORT': PORT,
-    }
+    },
 }
-
 
 
 # Password validation
@@ -146,8 +144,8 @@ INTERNAL_IPS = [
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(BASE_DIR, 'djangoblog_cache')
-    }
+        'LOCATION': os.path.join(BASE_DIR, 'djangoblog_cache'),
+    },
 }
 
 CAPTCHA_IMAGE_SIZE = [200, 100]

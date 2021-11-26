@@ -143,8 +143,6 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
-LOGIN_REDIRECT_URL = '/'
-
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
@@ -154,4 +152,3 @@ CACHES = {
 
 CAPTCHA_IMAGE_SIZE = [200, 100]
 CAPTCHA_FONT_SIZE = 30
-

@@ -43,7 +43,7 @@ class SinglePost(DataMixin, DetailView, FormMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         extra_context = self.get_user_context(
-            comments=Comment.objects.filter(post=context['post'].pk).order_by('published').select_related('author')
+            comments=Comment.objects.filter(post=context['post'].pk).order_by('published').select_related('author'),
         )
         paginator = Paginator(extra_context['comments'], self.comments_per_page)
         page = self.request.GET.get('page')
@@ -106,13 +106,12 @@ class RegisterUser(DataMixin, CreateView):
     def form_valid(self, form):
         user = form.save()
         login(self.request, user)
-        return redirect('home')
+        return redirect(self.request.GET['next'])
 
 
 class LoginUser(DataMixin, LoginView):
     form_class = LoginUserForm
     template_name = 'blog_core/login.html'
-    LOGIN_REDIRECT_URL = 'home'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -124,4 +123,4 @@ class LoginUser(DataMixin, LoginView):
 
 def logout_user(request):
     logout(request)
-    return redirect('home')
+    return redirect(request.GET['next'])

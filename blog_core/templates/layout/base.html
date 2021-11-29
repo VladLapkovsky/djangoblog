@@ -25,7 +25,7 @@
         <div class="navbar-nav">
             {% if request.user.is_authenticated %}
             <div class="nav-item text-nowrap d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
-                <span class="nav-link px-3">Hello, {{ user.username }}</span>
+                <a href="/@{{ user.username }}" class="nav-link px-3">Hello, {{ user.username }}</a>
                 <a class="nav-link px-3" href="{% url 'logout' %}?next={{request.get_full_path}}">Log out</a>
             </div>
             {% else %}

@@ -10,4 +10,4 @@ def get_slug_from_title(title: str) -> str:
     Returns:
         post slug
     """
-    return title.strip('*!., ').lower().replace(' ', '-')
+    return title.strip('*!., ').lower().replace("'", '').replace(' ', '-')

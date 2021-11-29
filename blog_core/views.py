@@ -167,7 +167,6 @@ class RegisterUser(DataMixin, CreateView):
 
     form_class = RegisterUserForm
     template_name = 'blog_core/register.html'
-    success_url = reverse_lazy('login')
 
     def get_context_data(self, **kwargs: dict) -> dict:
         """Provide additional args to the user register page.

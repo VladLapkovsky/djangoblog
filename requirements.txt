@@ -1,2 +1,4 @@
 Django~=3.2.9
 psycopg2-binary~=2.9.2
+django-simple-captcha~=0.5.14
+django-debug-toolbar~=3.2.2

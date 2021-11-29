@@ -25,13 +25,13 @@
         <div class="navbar-nav">
             {% if request.user.is_authenticated %}
             <div class="nav-item text-nowrap d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
-                <span class="nav-link px-3">Hello, {{ user.username }}</span>
-                <a class="nav-link px-3" href="{% url 'logout' %}">Log out</a>
+                <a href="/@{{ user.username }}" class="nav-link px-3">Hello, {{ user.username }}</a>
+                <a class="nav-link px-3" href="{% url 'logout' %}?next={{request.get_full_path}}">Log out</a>
             </div>
             {% else %}
             <div class="nav-item text-nowrap d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
-                <a class="nav-link px-3" href="{% url 'login' %}">Log in</a>
-                <a class="nav-link px-3" href="{% url 'register' %}">Sign in</a>
+                <a class="nav-link px-3" href="{% url 'login' %}?next={{request.get_full_path}}">Log in</a>
+                <a class="nav-link px-3" href="{% url 'register' %}?next={{request.get_full_path}}">Sign in</a>
             </div>
             {% endif %}
 

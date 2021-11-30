@@ -40,14 +40,10 @@ class NewPostContent(BaseModel):
             input title
 
         Raises:
-            ValueError: if title has forbidden characters
+            ValueError: if title contains not only letters or letters and digits
         """
-        forbidden_characters = '!@#$%^&*()_-+~'
-        for char in forbidden_characters:
-            if char in input_title:
-                err_msg = 'Enter correct title'
-                err_msg_explanation = f'(not empty, without forbidden characters {forbidden_characters}).'
-                raise ValueError(' '.join([err_msg, err_msg_explanation]))
+        if input_title.isalpha() or input_title.isalnum() and not input_title.isdigit():
+            raise ValueError('The title should contain letters or letters and digits only.')
         return input_title
 
     @validator('title')

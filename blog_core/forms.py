@@ -5,7 +5,7 @@ RegisterUserForm - form to register new user.
 LoginUserForm - form for user log in.
 CommentForm - form to add new comments.
 """
-
+import pydantic
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.exceptions import ValidationError
@@ -13,6 +13,7 @@ from captcha.fields import CaptchaField
 
 from blog_core.models import Comment, CustomUser, Post
 from blog_core.utils import FormStyleClassMixin
+from blog_core.views_handlers import NewPostContent
 
 TITLE_WIDGET = forms.TextInput(
     attrs={
@@ -40,20 +41,19 @@ class AddPostForm(FormStyleClassMixin, forms.ModelForm):
         }
 
     def clean_title(self) -> str:
-        """Validate new post title for correctness and check if a new post's title exists.
+        """Validate new post title for correctness.
 
         Returns:
             Validated title
 
         Raises:
-            ValidationError: if title length > 200 or post with this title already exists
+            ValidationError: if title is not correct
         """
-        title = self.cleaned_data['title']
-        if Post.objects.filter(title=title).exists():
-            raise ValidationError('The post with this title is already exists. Try another one.')
-        if len(title) > 200:
-            raise ValidationError('The title is longer than 200 characters.')
-        return title
+        try:
+            new_post = NewPostContent(title=self.cleaned_data['title'])
+        except pydantic.ValidationError as error:
+            raise ValidationError(error.raw_errors[0].exc)
+        return new_post.title
 
 
 class RegisterUserForm(FormStyleClassMixin, UserCreationForm):

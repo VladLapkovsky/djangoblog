@@ -42,9 +42,9 @@ class NewPostContent(BaseModel):
         Raises:
             ValueError: if title contains not only letters or letters and digits
         """
-        if input_title.isalpha() or input_title.isalnum() and not input_title.isdigit():
-            raise ValueError('The title should contain letters or letters and digits only.')
-        return input_title
+        if input_title.isalpha() or (input_title.isalnum() and not input_title.isdigit()):
+            return input_title
+        raise ValueError('The title should contain letters or letters and digits only.')
 
     @validator('title')
     def is_post_title_unique(cls, input_title: str):

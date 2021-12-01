@@ -3,3 +3,4 @@ psycopg2-binary~=2.9.2
 django-simple-captcha~=0.5.14
 django-debug-toolbar~=3.2.2
 pydantic~=1.8.2
+djangorestframework~=3.12.4

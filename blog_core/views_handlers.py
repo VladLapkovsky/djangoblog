@@ -59,8 +59,6 @@ class NewPostContent(BaseModel):
         Raises:
             ValueError: if title is not unique
         """
-        if Post.objects.filter(title=input_title).exists():
-            raise ValueError('The post with this title is already exists. Try another one.')
         if Post.objects.filter(slug=get_slug_from_title(input_title)).exists():
             raise ValueError('The post with this title is already exists. Try another one.')
         return input_title
@@ -75,4 +73,4 @@ def get_slug_from_title(title: str) -> str:
     Returns:
         post slug
     """
-    return title.strip('., ').lower().replace("'", '').replace(' ', '-')
+    return title.lower().replace(' ', '-')

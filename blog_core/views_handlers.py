@@ -42,7 +42,8 @@ class NewPostContent(BaseModel):
         Raises:
             ValueError: if title contains not only letters or letters and digits
         """
-        if input_title.isalpha() or (input_title.isalnum() and not input_title.isdigit()):
+        title = input_title.replace(' ', '')
+        if title.isalpha() or (title.isalnum() and not input_title.isdigit()):
             return input_title
         raise ValueError('The title should contain letters or letters and digits only.')
 

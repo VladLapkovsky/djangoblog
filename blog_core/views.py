@@ -281,3 +281,41 @@ class UserPage(DataMixin, ListView):
         return Post.objects.filter(
             author=self.author_fields,
         ).annotate(Count('comments')).order_by('-published').select_related('author')
+
+
+class PostListView(APIView):
+    """List of posts"""
+
+    def get(self, request):
+        posts = Post.objects.all()
+        serializer = PostListSerializer(posts, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        try:
+            new_post = NewPostContent(title=request.data['title'])
+        except pydantic.ValidationError as error:
+            return Response({"error": str(error.raw_errors[0].exc)})
+        else:
+            serializer = PostListSerializer(data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                serializer.validated_data['slug'] = get_slug_from_title(new_post.title)
+                saved_post = serializer.save()
+            return Response({'success': f'Article {saved_post.title} created successfully'})
+
+
+class PostDetailView(APIView):
+    """Detailed post"""
+
+    def get(self, request, pk):
+        post = Post.objects.get(id=pk)
+        serializer = PostDetailSerializer(post)
+        return Response(serializer.data)
+
+
+class CommentCreateView(APIView):
+    def post(self, request):
+        serializer = CommentCreateSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            saved_comment = serializer.save()
+        return Response({'success': f'Comment by {saved_comment.author} created successfully'})

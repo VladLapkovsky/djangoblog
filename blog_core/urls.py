@@ -2,9 +2,14 @@
 
 from django.urls import path
 
-from blog_core.views import AddPostPage, UserPage, BlogHome, LoginUser, logout_user, RegisterUser, SinglePost
+from blog_core.views import BlogHome, SinglePost, UserPage
+from blog_core.views import AddPostPage, RegisterUser, LoginUser, logout_user
+from blog_core.views import PostListView, PostDetailView, CommentCreateView
 
 urlpatterns = [
+    path('api/posts/', PostListView.as_view(), name='api_posts'),
+    path('api/posts/<int:pk>/', PostDetailView.as_view(), name='api_post'),
+    path('api/comments/', CommentCreateView.as_view(), name='api_comments'),
     path('', BlogHome.as_view(), name='home'),
     path('register/', RegisterUser.as_view(), name='register'),
     path('login/', LoginUser.as_view(), name='login'),

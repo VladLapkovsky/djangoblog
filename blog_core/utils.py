@@ -44,5 +44,8 @@ class FormStyleClassMixin(forms.Form):
             visible.field.widget.attrs['class'] = CONTENT_AREA_CLASS
 
 
-class APIPostMixin(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(slug_field='username', write_only=True, queryset=CustomUser.objects.all())
+class APIAuthorMixin(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        queryset=CustomUser.objects.all(),
+    )

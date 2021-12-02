@@ -287,7 +287,7 @@ class PostListView(APIView):
     """List of posts"""
 
     def get(self, request):
-        posts = Post.objects.all()
+        posts = Post.objects.select_related('author').all()
         serializer = PostListSerializer(posts, many=True)
         return Response(serializer.data)
 
@@ -308,7 +308,7 @@ class PostDetailView(APIView):
     """Detailed post"""
 
     def get(self, request, pk):
-        post = Post.objects.get(id=pk)
+        post = Post.objects.select_related('author').get(id=pk)
         serializer = PostDetailSerializer(post)
         return Response(serializer.data)
 

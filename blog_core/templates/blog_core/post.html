@@ -49,9 +49,11 @@
         </form>
     </div>
     {% endif %}
+    {% if comments %}
     <h4 class="post__title">
         Comments:
     </h4>
+    {% endif %}
     {% for comment in comments %}
     <div class="comments__container border-top">
         <div class="post__user__info">

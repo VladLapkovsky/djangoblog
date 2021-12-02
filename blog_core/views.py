@@ -11,9 +11,11 @@ UserPage - provides view for the user page.
 """
 from typing import Union
 
+import pydantic
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
+from django.core.exceptions import ValidationError
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import Paginator
 from django.db.models import Count, QuerySet
@@ -22,11 +24,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.edit import FormMixin
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from blog_core.forms import AddPostForm, CommentForm, LoginUserForm, RegisterUserForm
 from blog_core.models import Comment, Post
+from blog_core.serializers import PostListSerializer, PostDetailSerializer, CommentCreateSerializer
 from blog_core.utils import DataMixin
-from blog_core.views_handlers import get_slug_from_title
+from blog_core.views_handlers import get_slug_from_title, NewPostContent
 from users.models import CustomUser
 
 
@@ -62,7 +67,7 @@ class BlogHome(DataMixin, ListView):
         Returns:
             Post QuerySet with comment column
         """
-        return Post.objects.annotate(Count('comment')).order_by('-published').select_related('author')
+        return Post.objects.annotate(Count('comments')).order_by('-published').select_related('author')
 
 
 class SinglePost(DataMixin, DetailView, FormMixin):
@@ -100,11 +105,12 @@ class SinglePost(DataMixin, DetailView, FormMixin):
         """
         return Post.objects.filter(slug=self.kwargs['post_slug']).select_related('author')
 
-    def post(self, request: WSGIRequest) -> Union[HttpResponseRedirect, HttpResponse]:
+    def post(self, request: WSGIRequest, post_slug: str) -> Union[HttpResponseRedirect, HttpResponse]:
         """Create new comment object from comment form.
 
         Args:
             request: POST request
+            post_slug: post slug
 
         Returns:
             redirect to the same page
@@ -112,7 +118,7 @@ class SinglePost(DataMixin, DetailView, FormMixin):
         form = self.form_class(request.POST)
         if form.is_valid():
             cleaned_data = form.cleaned_data
-            post = get_object_or_404(Post, slug=self.kwargs['post_slug'])
+            post = get_object_or_404(Post, slug=post_slug)
             Comment.objects.create(
                 post=post,
                 author=CustomUser.objects.get(id=self.request.user.id),
@@ -274,4 +280,4 @@ class UserPage(DataMixin, ListView):
         self.author_fields = CustomUser.objects.get(username=self.kwargs['author'])
         return Post.objects.filter(
             author=self.author_fields,
-        ).annotate(Count('comment')).order_by('-published').select_related('author')
+        ).annotate(Count('comments')).order_by('-published').select_related('author')

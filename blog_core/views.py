@@ -8,6 +8,8 @@ RegisterUser - provides view for the user register page.
 LoginUser - provides view for the user log in page.
 logout_user - provides user logout logic.
 UserPage - provides view for the user page.
+PostViewSet - provides API to GET list of post, GET single post, POST a new post.
+CommentCreateView - provides API to POST a new comment.
 """
 from typing import Union
 
@@ -15,7 +17,6 @@ import pydantic
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
-from django.core.exceptions import ValidationError
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import Paginator
 from django.db.models import Count, QuerySet
@@ -24,14 +25,18 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.edit import FormMixin
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework import viewsets
+from rest_framework.exceptions import ValidationError
+from rest_framework.mixins import CreateModelMixin
+from rest_framework.viewsets import GenericViewSet
 
-from blog_core.forms import AddPostForm, CommentForm, LoginUserForm, RegisterUserForm
+from blog_core.forms import (AddPostForm, CommentForm, LoginUserForm,
+                             RegisterUserForm)
 from blog_core.models import Comment, Post
-from blog_core.serializers import PostListSerializer, PostDetailSerializer, CommentCreateSerializer
+from blog_core.serializers import (CommentCreateSerializer,
+                                   PostDetailSerializer, PostListSerializer)
 from blog_core.utils import DataMixin
-from blog_core.views_handlers import get_slug_from_title, NewPostContent
+from blog_core.views_handlers import NewPostContent, get_slug_from_title
 from users.models import CustomUser
 
 
@@ -283,39 +288,27 @@ class UserPage(DataMixin, ListView):
         ).annotate(Count('comments')).order_by('-published').select_related('author')
 
 
-class PostListView(APIView):
-    """List of posts"""
+class PostViewSet(viewsets.ModelViewSet):
+    """Posts for everyone."""
 
-    def get(self, request):
-        posts = Post.objects.select_related('author').all()
-        serializer = PostListSerializer(posts, many=True)
-        return Response(serializer.data)
+    queryset = Post.objects.select_related('author')
+    serializer_class = PostListSerializer
 
-    def post(self, request):
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return PostListSerializer
+        elif self.action == 'retrieve':
+            return PostDetailSerializer
+        return super(PostViewSet, self).get_serializer_class()
+
+    def perform_create(self, serializer):
         try:
-            new_post = NewPostContent(title=request.data['title'])
+            new_post = NewPostContent(title=self.request.data['title'])
         except pydantic.ValidationError as error:
-            return Response({"error": str(error.raw_errors[0].exc)})
+            raise ValidationError({'error': str(error.raw_errors[0].exc)})
         else:
-            serializer = PostListSerializer(data=request.data)
-            if serializer.is_valid(raise_exception=True):
-                serializer.validated_data['slug'] = get_slug_from_title(new_post.title)
-                saved_post = serializer.save()
-            return Response({'success': f'Article {saved_post.title} created successfully'})
+            return serializer.save(slug=get_slug_from_title(new_post.title))
 
 
-class PostDetailView(APIView):
-    """Detailed post"""
-
-    def get(self, request, pk):
-        post = Post.objects.select_related('author').get(id=pk)
-        serializer = PostDetailSerializer(post)
-        return Response(serializer.data)
-
-
-class CommentCreateView(APIView):
-    def post(self, request):
-        serializer = CommentCreateSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            saved_comment = serializer.save()
-        return Response({'success': f'Comment by {saved_comment.author} created successfully'})
+class CommentCreateView(GenericViewSet, CreateModelMixin):
+    serializer_class = CommentCreateSerializer

@@ -1,18 +1,14 @@
 """blog_core URL configuration."""
 
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-
+from django.urls import path
 from blog_core.views import (AddPostPage, BlogHome, CommentCreateView,
-                             LoginUser, PostViewSet, RegisterUser, SinglePost,
-                             UserPage, logout_user)
-
-router = DefaultRouter()
-router.register(r'posts', PostViewSet, basename='api_posts')
-router.register(r'comments', CommentCreateView, basename='api_comments')
+                             LoginUser, PostDetailView, PostListView,
+                             RegisterUser, SinglePost, UserPage, logout_user)
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('api/posts/', PostListView.as_view(), name='api_posts'),
+    path('api/posts/<int:pk>/', PostDetailView.as_view(), name='api_post'),
+    path('api/comments/', CommentCreateView.as_view({'post': 'create'}), name='api_comments'),
     path('', BlogHome.as_view(), name='home'),
     path('register/', RegisterUser.as_view(), name='register'),
     path('login/', LoginUser.as_view(), name='login'),

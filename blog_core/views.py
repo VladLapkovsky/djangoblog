@@ -25,10 +25,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.edit import FormMixin
-from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import ListCreateAPIView, RetrieveAPIView
 from rest_framework.mixins import CreateModelMixin
-from rest_framework.serializers import SerializerMetaclass
 from rest_framework.viewsets import GenericViewSet
 
 from blog_core.forms import (AddPostForm, CommentForm, LoginUserForm,
@@ -289,29 +288,21 @@ class UserPage(DataMixin, ListView):
         ).annotate(Count('comments')).order_by('-published').select_related('author')
 
 
-class PostViewSet(viewsets.ModelViewSet):
+class PostListView(ListCreateAPIView):
     """Posts for everyone."""
 
     queryset = Post.objects.select_related('author')
     serializer_class = PostListSerializer
 
-    def get_serializer_class(self) -> SerializerMetaclass:
-        """Choose a serializer class depending on API action.
-        Returns:
-            Serializer class
-        """
-        if self.action == 'list':
-            return PostListSerializer
-        elif self.action == 'retrieve':
-            return PostDetailSerializer
-        return super().get_serializer_class()
-
     def perform_create(self, serializer) -> Post:
         """Check request data for correctness.
+
         Args:
             serializer: input serializer
+
         Returns:
             Send correct data to the serializer
+
         Raises:
             ValidationError: DRF ValidationError if request data is not correct
         """
@@ -320,6 +311,14 @@ class PostViewSet(viewsets.ModelViewSet):
         except pydantic.ValidationError as error:
             raise ValidationError({'error': str(error.raw_errors[0].exc)})
         return serializer.save(slug=get_slug_from_title(new_post.title))
+
+
+class PostDetailView(RetrieveAPIView):
+    """Detailed post for everyone."""
+
+    queryset = Post.objects.prefetch_related('author', 'comments__author')
+    serializer_class = PostDetailSerializer
+
 
 class CommentCreateView(GenericViewSet, CreateModelMixin):
     """Comments creation API."""

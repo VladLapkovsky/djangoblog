@@ -28,6 +28,7 @@ from django.views.generic.edit import FormMixin
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import CreateModelMixin
+from rest_framework.serializers import SerializerMetaclass
 from rest_framework.viewsets import GenericViewSet
 
 from blog_core.forms import (AddPostForm, CommentForm, LoginUserForm,
@@ -282,6 +283,7 @@ class UserPage(DataMixin, ListView):
         Returns:
             Posts QuerySet
         """
+        # TODO: optimization
         self.author_fields = CustomUser.objects.get(username=self.kwargs['author'])
         return Post.objects.filter(
             author=self.author_fields,
@@ -294,21 +296,38 @@ class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.select_related('author')
     serializer_class = PostListSerializer
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> SerializerMetaclass:
+        """Choose a serializer class depending on API action.
+
+        Returns:
+            Serializer class
+        """
         if self.action == 'list':
             return PostListSerializer
         elif self.action == 'retrieve':
             return PostDetailSerializer
-        return super(PostViewSet, self).get_serializer_class()
+        return super().get_serializer_class()
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer) -> Post:
+        """Check request data for correctness.
+
+        Args:
+            serializer: input serializer
+
+        Returns:
+            Send correct data to the serializer
+
+        Raises:
+            ValidationError: DRF ValidationError if request data is not correct
+        """
         try:
             new_post = NewPostContent(title=self.request.data['title'])
         except pydantic.ValidationError as error:
             raise ValidationError({'error': str(error.raw_errors[0].exc)})
-        else:
-            return serializer.save(slug=get_slug_from_title(new_post.title))
+        return serializer.save(slug=get_slug_from_title(new_post.title))
 
 
 class CommentCreateView(GenericViewSet, CreateModelMixin):
+    """Comments creation API."""
+
     serializer_class = CommentCreateSerializer

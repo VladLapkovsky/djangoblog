@@ -20,6 +20,12 @@ class DataMixin:
         Returns:
             kwargs
         """
+        if self.request.GET.get('next'):
+            kwargs['user_login_path'] = self.request.GET['next']
+            kwargs['user_register_path'] = self.request.GET['next']
+        else:
+            kwargs['user_login_path'] = self.request.get_full_path()
+            kwargs['user_register_path'] = self.request.get_full_path()
         return kwargs
 
 

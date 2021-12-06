@@ -24,7 +24,7 @@
             {% endfor %}
         </div>
         <hr class="my-4">
-        <span>Not registered? Click <a href="{% url 'register' %}">Sign in</a>.</span>
+        <span>Not registered? Click <a href="{% url 'register' %}?next={{ user_register_path }}">Sign in</a>.</span>
         <hr class="my-4">
         <button class="w-100 btn btn-primary btn-lg" type="submit">Log in</button>
     </form>

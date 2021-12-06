@@ -293,7 +293,7 @@ class UserPage(DataMixin, ListView):
 class PostViewSet(viewsets.ModelViewSet):
     """Posts for everyone."""
 
-    queryset = Post.objects.select_related('author')
+    queryset = Post.objects.prefetch_related('author', 'comments__author')
     serializer_class = PostListSerializer
 
     def get_serializer_class(self) -> SerializerMetaclass:

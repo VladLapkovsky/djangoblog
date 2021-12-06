@@ -14,10 +14,10 @@ router.register(r'comments', CommentCreateView, basename='api_comments')
 urlpatterns = [
     path('api/', include(router.urls)),
     path('', BlogHome.as_view(), name='home'),
-    path('<slug:post_slug>/', SinglePost.as_view(), name='post'),
     path('register/', RegisterUser.as_view(), name='register'),
     path('login/', LoginUser.as_view(), name='login'),
     path('add-post/', AddPostPage.as_view(), name='add_post'),
     path('logout/', logout_user, name='logout'),
     path('@<str:author>/', UserPage.as_view(), name='user_page'),
+    path('<slug:post_slug>/', SinglePost.as_view(), name='post'),
 ]

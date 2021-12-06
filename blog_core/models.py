@@ -62,6 +62,7 @@ class Comment(models.Model):
         null=False,
         on_delete=models.CASCADE,
         verbose_name='post',
+        related_name='comments',
     )
 
     def __str__(self) -> str:

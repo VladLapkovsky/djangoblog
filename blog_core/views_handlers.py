@@ -42,7 +42,8 @@ class NewPostContent(BaseModel):
         Raises:
             ValueError: if title contains not only letters or letters and digits
         """
-        if input_title.isalpha() or (input_title.isalnum() and not input_title.isdigit()):
+        title = input_title.replace(' ', '')
+        if title.isalpha() or (title.isalnum() and not input_title.isdigit()):
             return input_title
         raise ValueError('The title should contain letters or letters and digits only.')
 
@@ -59,8 +60,6 @@ class NewPostContent(BaseModel):
         Raises:
             ValueError: if title is not unique
         """
-        if Post.objects.filter(title=input_title).exists():
-            raise ValueError('The post with this title is already exists. Try another one.')
         if Post.objects.filter(slug=get_slug_from_title(input_title)).exists():
             raise ValueError('The post with this title is already exists. Try another one.')
         return input_title
@@ -75,4 +74,4 @@ def get_slug_from_title(title: str) -> str:
     Returns:
         post slug
     """
-    return title.strip('., ').lower().replace("'", '').replace(' ', '-')
+    return title.lower().replace(' ', '-')

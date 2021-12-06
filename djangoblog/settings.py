@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'debug_toolbar',
     'captcha',
     'users.apps.UsersConfig',
@@ -90,6 +91,7 @@ DATABASES = {
         'PASSWORD': PASSWORD,
         'HOST': HOST,
         'PORT': PORT,
+        'ATOMIC_REQUESTS': True,
     },
 }
 
@@ -152,3 +154,9 @@ CACHES = {
 
 CAPTCHA_IMAGE_SIZE = [200, 100]
 CAPTCHA_FONT_SIZE = 30
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 3,
+}

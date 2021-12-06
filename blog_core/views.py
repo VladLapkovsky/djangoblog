@@ -8,9 +8,12 @@ RegisterUser - provides view for the user register page.
 LoginUser - provides view for the user log in page.
 logout_user - provides user logout logic.
 UserPage - provides view for the user page.
+PostViewSet - provides API to GET list of post, GET single post, POST a new post.
+CommentCreateView - provides API to POST a new comment.
 """
 from typing import Union
 
+import pydantic
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
@@ -22,11 +25,19 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.edit import FormMixin
+from rest_framework import viewsets
+from rest_framework.exceptions import ValidationError
+from rest_framework.mixins import CreateModelMixin
+from rest_framework.serializers import SerializerMetaclass
+from rest_framework.viewsets import GenericViewSet
 
-from blog_core.forms import AddPostForm, CommentForm, LoginUserForm, RegisterUserForm
+from blog_core.forms import (AddPostForm, CommentForm, LoginUserForm,
+                             RegisterUserForm)
 from blog_core.models import Comment, Post
+from blog_core.serializers import (CommentCreateSerializer,
+                                   PostDetailSerializer, PostListSerializer)
 from blog_core.utils import DataMixin
-from blog_core.views_handlers import get_slug_from_title
+from blog_core.views_handlers import NewPostContent, get_slug_from_title
 from users.models import CustomUser
 
 
@@ -62,7 +73,7 @@ class BlogHome(DataMixin, ListView):
         Returns:
             Post QuerySet with comment column
         """
-        return Post.objects.annotate(Count('comment')).order_by('-published').select_related('author')
+        return Post.objects.annotate(Count('comments')).order_by('-published').select_related('author')
 
 
 class SinglePost(DataMixin, DetailView, FormMixin):
@@ -100,11 +111,12 @@ class SinglePost(DataMixin, DetailView, FormMixin):
         """
         return Post.objects.filter(slug=self.kwargs['post_slug']).select_related('author')
 
-    def post(self, request: WSGIRequest) -> Union[HttpResponseRedirect, HttpResponse]:
+    def post(self, request: WSGIRequest, post_slug: str) -> Union[HttpResponseRedirect, HttpResponse]:
         """Create new comment object from comment form.
 
         Args:
             request: POST request
+            post_slug: post slug
 
         Returns:
             redirect to the same page
@@ -112,7 +124,7 @@ class SinglePost(DataMixin, DetailView, FormMixin):
         form = self.form_class(request.POST)
         if form.is_valid():
             cleaned_data = form.cleaned_data
-            post = get_object_or_404(Post, slug=self.kwargs['post_slug'])
+            post = get_object_or_404(Post, slug=post_slug)
             Comment.objects.create(
                 post=post,
                 author=CustomUser.objects.get(id=self.request.user.id),
@@ -271,7 +283,51 @@ class UserPage(DataMixin, ListView):
         Returns:
             Posts QuerySet
         """
+        # TODO: optimization
         self.author_fields = CustomUser.objects.get(username=self.kwargs['author'])
         return Post.objects.filter(
             author=self.author_fields,
-        ).annotate(Count('comment')).order_by('-published').select_related('author')
+        ).annotate(Count('comments')).order_by('-published').select_related('author')
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    """Posts for everyone."""
+
+    queryset = Post.objects.select_related('author')
+    serializer_class = PostListSerializer
+
+    def get_serializer_class(self) -> SerializerMetaclass:
+        """Choose a serializer class depending on API action.
+
+        Returns:
+            Serializer class
+        """
+        if self.action == 'list':
+            return PostListSerializer
+        elif self.action == 'retrieve':
+            return PostDetailSerializer
+        return super().get_serializer_class()
+
+    def perform_create(self, serializer) -> Post:
+        """Check request data for correctness.
+
+        Args:
+            serializer: input serializer
+
+        Returns:
+            Send correct data to the serializer
+
+        Raises:
+            ValidationError: DRF ValidationError if request data is not correct
+        """
+        try:
+            new_post = NewPostContent(title=self.request.data['title'])
+        except pydantic.ValidationError as error:
+            raise ValidationError({'error': str(error.raw_errors[0].exc)})
+        return serializer.save(slug=get_slug_from_title(new_post.title))
+
+
+class CommentCreateView(GenericViewSet, CreateModelMixin):
+    """Comments creation API."""
+
+    serializer_class = CommentCreateSerializer

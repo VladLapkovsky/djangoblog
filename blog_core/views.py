@@ -25,10 +25,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.edit import FormMixin
-from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import ListCreateAPIView, RetrieveAPIView
 from rest_framework.mixins import CreateModelMixin
-from rest_framework.serializers import SerializerMetaclass
 from rest_framework.viewsets import GenericViewSet
 
 from blog_core.forms import (AddPostForm, CommentForm, LoginUserForm,
@@ -95,13 +94,14 @@ class SinglePost(DataMixin, DetailView, FormMixin):
             args for the home page template
         """
         context = super().get_context_data(**kwargs)
-        extra_context = self.get_user_context(
-            comments=Comment.objects.filter(post=context['post'].pk).order_by('-published').select_related('author'),
+        extra_context = self.get_user_context()
+        paginator = Paginator(
+            Comment.objects.filter(post=context['post'].pk).order_by('-published').select_related('author'),
+            self.comments_per_page,
         )
-        paginator = Paginator(extra_context['comments'], self.comments_per_page)
         page = self.request.GET.get('page')
         context['comments'] = paginator.get_page(page)
-        return context
+        return context | extra_context
 
     def get_queryset(self) -> QuerySet:
         """Select specific post from the Post model.
@@ -208,7 +208,7 @@ class RegisterUser(DataMixin, CreateView):
         """
         user = form.save()
         login(self.request, user)
-        return redirect(self.request.GET['next'])
+        return redirect(self.request.GET['next'] if self.request.GET else 'home')
 
 
 class LoginUser(DataMixin, LoginView):
@@ -272,7 +272,6 @@ class UserPage(DataMixin, ListView):
         extra_context = self.get_user_context(
             author=self.author_fields,
         )
-
         return context | extra_context
 
     def get_queryset(self) -> QuerySet:
@@ -283,30 +282,17 @@ class UserPage(DataMixin, ListView):
         Returns:
             Posts QuerySet
         """
-        # TODO: optimization
         self.author_fields = CustomUser.objects.get(username=self.kwargs['author'])
         return Post.objects.filter(
             author=self.author_fields,
         ).annotate(Count('comments')).order_by('-published').select_related('author')
 
 
-class PostViewSet(viewsets.ModelViewSet):
+class PostListView(ListCreateAPIView):
     """Posts for everyone."""
 
     queryset = Post.objects.select_related('author')
     serializer_class = PostListSerializer
-
-    def get_serializer_class(self) -> SerializerMetaclass:
-        """Choose a serializer class depending on API action.
-
-        Returns:
-            Serializer class
-        """
-        if self.action == 'list':
-            return PostListSerializer
-        elif self.action == 'retrieve':
-            return PostDetailSerializer
-        return super().get_serializer_class()
 
     def perform_create(self, serializer) -> Post:
         """Check request data for correctness.
@@ -325,6 +311,13 @@ class PostViewSet(viewsets.ModelViewSet):
         except pydantic.ValidationError as error:
             raise ValidationError({'error': str(error.raw_errors[0].exc)})
         return serializer.save(slug=get_slug_from_title(new_post.title))
+
+
+class PostDetailView(RetrieveAPIView):
+    """Detailed post for everyone."""
+
+    queryset = Post.objects.prefetch_related('author', 'comments__author')
+    serializer_class = PostDetailSerializer
 
 
 class CommentCreateView(GenericViewSet, CreateModelMixin):

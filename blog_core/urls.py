@@ -5,7 +5,13 @@ from blog_core.views import (AddPostPage, BlogHome, CommentCreateView,
                              LoginUser, PostDetailView, PostListView,
                              RegisterUser, SinglePost, UserPage, logout_user)
 
-urlpatterns = [
+from blog_core.yasg import urlpatterns as doc_urls
+
+urlpatterns = []
+
+urlpatterns += doc_urls
+
+urlpatterns += [
     path('api/posts/', PostListView.as_view(), name='api_posts'),
     path('api/posts/<int:pk>/', PostDetailView.as_view(), name='api_post'),
     path('api/comments/', CommentCreateView.as_view({'post': 'create'}), name='api_comments'),

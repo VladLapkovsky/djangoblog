@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'captcha',
     'users.apps.UsersConfig',
     'blog_core.apps.BlogCoreConfig',
+    'tg_bot.apps.TgBotConfig',
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'

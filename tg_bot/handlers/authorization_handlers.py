@@ -1,12 +1,9 @@
-from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.shortcuts import get_object_or_404
 from telegram import Update
 from telegram.ext import (CallbackContext, CommandHandler, ConversationHandler,
                           Filters, MessageHandler)
 
-from tg_bot.handlers.handlers_variables import (END, IS_AUTHORIZED,
-                                                LIST_OF_ALL_COMMANDS, PASSWORD,
-                                                USERNAME, CURRENT_ACTION, AUTHORIZATION, REGISTER)
+from tg_bot.handlers.handlers_variables import STOPPING, SELECTING_ACTION, USERNAME, LIST_OF_ALL_COMMANDS, IS_AUTHORIZED, PASSWORD
+
 from tg_bot.models import TelegramBotChat
 from users.models import CustomUser
 
@@ -18,7 +15,7 @@ def confirm_authorization(update: Update, context: CallbackContext):
         '\nYou can go next.\n' + LIST_OF_ALL_COMMANDS
     )
     context.user_data[IS_AUTHORIZED] = True
-    return END
+    return STOPPING
 
 
 def authorization_error(update: Update, context: CallbackContext):
@@ -74,7 +71,7 @@ def start_authorization(update: Update, context: CallbackContext):
         update.message.reply_text(
             'You are authorized.'
         )
-        return END
+        return STOPPING
     context.user_data[IS_AUTHORIZED] = False
     update.message.reply_text(
         'Please, enter your username.\n'
@@ -84,28 +81,39 @@ def start_authorization(update: Update, context: CallbackContext):
 
 
 def authorize(update: Update, context: CallbackContext):
-    update.message.reply_text(
-        'In authorize'
-    )
-    context.user_data[CURRENT_ACTION] = AUTHORIZATION
     return start_authorization(update, context)
 
 
-def stop(update: Update, context: CallbackContext) -> int:
-    """End Conversation by command."""
-    update.message.reply_text('Okay, bye.\n' + LIST_OF_ALL_COMMANDS)
-    return END
+def stop_authorization(update: Update, context: CallbackContext) -> str:
+    """Completely end conversation from within nested conversation."""
+    update.message.reply_text('Stopping authorization.\n' + LIST_OF_ALL_COMMANDS)
+
+    return STOPPING
 
 
-AUTHORIZE_HANDLERS = [
+def not_auth_commands_interception(update: Update, context: CallbackContext):
+    update.message.reply_text(
+        'Sorry, you had to not use commands.\n'
+        'Aborting authorization.\n'
+        'Use:\n' + LIST_OF_ALL_COMMANDS
+    )
+    return STOPPING
+
+
+AUTH_HANDLERS = [
     ConversationHandler(
         entry_points=[CommandHandler('authorize', authorize)],
         states={
-            AUTHORIZATION: [MessageHandler(Filters.text, authorize)],
             USERNAME: [MessageHandler(Filters.text & ~Filters.command, adding_username)],
             PASSWORD: [MessageHandler(Filters.text & ~Filters.command, adding_password)],
         },
-        fallbacks=[CommandHandler('stop', stop)],
+        fallbacks=[
+            CommandHandler('stop', stop_authorization),
+            MessageHandler(Filters.command, not_auth_commands_interception),
+        ],
+        allow_reentry=True,
+        map_to_parent={
+            STOPPING: SELECTING_ACTION,
+        },
     ),
-    CommandHandler('stop', stop),
 ]

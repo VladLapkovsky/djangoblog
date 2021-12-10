@@ -2,6 +2,8 @@ import requests
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler
 
+from tg_bot.handlers.handlers_variables import SELECTING_ACTION
+
 URL = 'http://127.0.0.1:8000/api/posts/'
 
 
@@ -15,6 +17,7 @@ def get_posts_count(update: Update, context: CallbackContext):
         json_resp = resp.json()
         msg = 'Total amount of posts: ' + str(json_resp['count'])
         context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
+    return SELECTING_ACTION
 
 
 POST_HANDLERS = [

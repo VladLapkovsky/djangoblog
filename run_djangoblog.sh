@@ -1,4 +1,7 @@
 #!/bin/bash
 
-python3 ./tg_bot/app.py & python3 manage.py runserver
+export DJANGO_SETTINGS_MODULE=djangoblog.settings
+#python3 ./tg_bot/app.py & python3 manage.py runserver
+gnome-terminal -- /bin/bash -c 'python3 manage.py runserver' &
+gnome-terminal -- /bin/bash -c 'python3 ./tg_bot/app.py'
 

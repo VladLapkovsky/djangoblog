@@ -1,3 +1,5 @@
+import functools
+
 from telegram import Update
 from telegram.ext import (CallbackContext, CommandHandler, ConversationHandler,
                           Filters, MessageHandler)
@@ -99,6 +101,24 @@ def not_auth_commands_interception(update: Update, context: CallbackContext):
         'Use:\n' + LIST_OF_ALL_COMMANDS
     )
     return END
+
+
+def authorization_required(func):
+    @functools.wraps(func)
+    def check_is_authorized(*args, **kwargs):
+        update = args[0]
+        context = args[1]
+        if not context.user_data.get(IS_AUTHORIZED):
+            update.message.reply_text(
+                'You must be authorized to run this command.\n'
+                'Use /authorize.'
+            )
+            return
+        else:
+            res = func(*args, **kwargs)
+            return res
+
+    return check_is_authorized
 
 
 AUTH_HANDLERS = [

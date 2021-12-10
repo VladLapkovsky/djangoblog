@@ -16,9 +16,9 @@ def start(update: Update, context: CallbackContext):
     )
     if not context.user_data.get(IS_AUTHORIZED):
         context.user_data[IS_AUTHORIZED] = False
-    return SELECTING_ACTION
 
 
+#TODO remove?
 def stop(update: Update, context: CallbackContext) -> int:
     """End Conversation by command."""
     update.message.reply_text('Okay, bye.\n'
@@ -40,27 +40,31 @@ def unknown(update: Update, context: CallbackContext):
     )
 
 
-# HANDLERS = [
-#     *COMMON_HANDLERS,
-#     *POST_HANDLERS,
-#     MessageHandler(Filters.text, unknown),  # must be the last one
-# ]
+HANDLERS = [
+    *COMMON_HANDLERS,
+    *AUTH_HANDLERS,
+    *POST_HANDLERS,
+    MessageHandler(Filters.text, unknown),  # must be the last one
+]
 
 
 def collect_handlers(dispatcher):
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start)],
-        states={
-            SELECTING_ACTION: [*AUTH_HANDLERS,
-                               *POST_HANDLERS,
-                               *COMMON_HANDLERS,
-                               # CommandHandler('get_posts_count', get_posts_count),
-                               # CommandHandler('help', help_list),
-                               ],
-            STOPPING: [CommandHandler('start', start)],
-        },
-        fallbacks=[CommandHandler('stop', stop)],
-        allow_reentry=True,
-    )
-    dispatcher.add_handler(conv_handler)
-    dispatcher.add_handler(MessageHandler(Filters.text, unknown))  # must be the last one
+    # conv_handler = ConversationHandler(
+    #     entry_points=[CommandHandler('start', start)],
+    #     states={
+    #         SELECTING_ACTION: [*AUTH_HANDLERS,
+    #                            *POST_HANDLERS,
+    #                            *COMMON_HANDLERS,
+    #                            # CommandHandler('get_posts_count', get_posts_count),
+    #                            # CommandHandler('help', help_list),
+    #                            ],
+    #         STOPPING: [CommandHandler('start', start)],
+    #     },
+    #     fallbacks=[CommandHandler('stop', stop)],
+    #     allow_reentry=True,
+    # )
+    # dispatcher.add_handler(conv_handler)
+    # dispatcher.add_handler(MessageHandler(Filters.text, unknown))  # must be the last one
+
+    for handler in HANDLERS:
+        dispatcher.add_handler(handler)

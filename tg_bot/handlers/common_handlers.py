@@ -9,7 +9,6 @@ def help_list(update: Update, context: CallbackContext):
     update.message.reply_text(
         text=text
     )
-    return SELECTING_ACTION
 
 
 COMMON_HANDLERS = [

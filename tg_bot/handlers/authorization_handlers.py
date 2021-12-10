@@ -2,7 +2,8 @@ from telegram import Update
 from telegram.ext import (CallbackContext, CommandHandler, ConversationHandler,
                           Filters, MessageHandler)
 
-from tg_bot.handlers.handlers_variables import STOPPING, SELECTING_ACTION, USERNAME, LIST_OF_ALL_COMMANDS, IS_AUTHORIZED, PASSWORD
+from tg_bot.handlers.handlers_variables import STOPPING, SELECTING_ACTION, USERNAME, LIST_OF_ALL_COMMANDS, \
+    IS_AUTHORIZED, PASSWORD, END
 
 from tg_bot.models import TelegramBotChat
 from users.models import CustomUser
@@ -15,7 +16,7 @@ def confirm_authorization(update: Update, context: CallbackContext):
         '\nYou can go next.\n' + LIST_OF_ALL_COMMANDS
     )
     context.user_data[IS_AUTHORIZED] = True
-    return STOPPING
+    return END
 
 
 def authorization_error(update: Update, context: CallbackContext):
@@ -71,7 +72,7 @@ def start_authorization(update: Update, context: CallbackContext):
         update.message.reply_text(
             'You are authorized.'
         )
-        return STOPPING
+        return END
     context.user_data[IS_AUTHORIZED] = False
     update.message.reply_text(
         'Please, enter your username.\n'
@@ -86,9 +87,9 @@ def authorize(update: Update, context: CallbackContext):
 
 def stop_authorization(update: Update, context: CallbackContext) -> str:
     """Completely end conversation from within nested conversation."""
-    update.message.reply_text('Stopping authorization.\n' + LIST_OF_ALL_COMMANDS)
+    update.message.reply_text('Authorization is canceled.\n' + LIST_OF_ALL_COMMANDS)
 
-    return STOPPING
+    return END
 
 
 def not_auth_commands_interception(update: Update, context: CallbackContext):
@@ -97,7 +98,7 @@ def not_auth_commands_interception(update: Update, context: CallbackContext):
         'Aborting authorization.\n'
         'Use:\n' + LIST_OF_ALL_COMMANDS
     )
-    return STOPPING
+    return END
 
 
 AUTH_HANDLERS = [

@@ -4,21 +4,34 @@ from telegram import Update
 from telegram.ext import (CallbackContext, CommandHandler, ConversationHandler,
                           Filters, MessageHandler)
 
-from tg_bot.handlers.handlers_variables import STOPPING, SELECTING_ACTION, USERNAME, LIST_OF_ALL_COMMANDS, \
-    IS_AUTHORIZED, PASSWORD, END
-
+from tg_bot.handlers.handlers_variables import (CURRENT_ACTION, END,
+                                                IS_AUTHORIZED,
+                                                LIST_OF_ALL_COMMANDS, PASSWORD,
+                                                USERNAME)
 from tg_bot.models import TelegramBotChat
 from users.models import CustomUser
 
 
-def confirm_authorization(update: Update, context: CallbackContext):
-    update.message.reply_text(
+def end_conversation(update: Update, message: str):
+    update.message.reply_text(message)
+    return END
+
+
+def confirm_action(update: Update, context: CallbackContext):
+    context.user_data[IS_AUTHORIZED] = True
+
+    message = str(
         'We are good. You are:\n'
         f'Username: {context.user_data[USERNAME]}\n'
         '\nYou can go next.\n' + LIST_OF_ALL_COMMANDS
     )
-    context.user_data[IS_AUTHORIZED] = True
-    return END
+    return end_conversation(update, message=message)
+
+
+def create_tgbot_record(chat_id, user_id) -> None:
+    tg_bot = TelegramBotChat.objects.create(telegram_chat_id=chat_id, user_id=user_id)
+    tg_bot.save()
+    return
 
 
 def authorization_error(update: Update, context: CallbackContext):
@@ -27,7 +40,7 @@ def authorization_error(update: Update, context: CallbackContext):
         'Please, enter a correct username and password.\n'
         'Note that both fields may be case-sensitive.\n'
     )
-    return start_authorization(update, context)
+    return authorize(update, context)
 
 
 def check_authorization_info(update: Update, context: CallbackContext):
@@ -40,9 +53,9 @@ def check_authorization_info(update: Update, context: CallbackContext):
     if not user.check_password(password):
         return authorization_error(update, context)
 
-    tg_bot = TelegramBotChat.objects.create(telegram_chat_id=update.effective_chat.id, user_id=user.id)
-    tg_bot.save()
-    return confirm_authorization(update, context)
+    create_tgbot_record(chat_id=update.effective_chat.id, user_id=user.id)
+
+    return confirm_action(update, context)
 
 
 def adding_password(update: Update, context: CallbackContext) -> str:
@@ -71,10 +84,9 @@ def is_user_in_db(update: Update):
 def start_authorization(update: Update, context: CallbackContext):
     if is_user_in_db(update):
         context.user_data[IS_AUTHORIZED] = True
-        update.message.reply_text(
-            'You are authorized.'
-        )
-        return END
+        message = 'You are authorized.'
+        return end_conversation(update, message=message)
+
     context.user_data[IS_AUTHORIZED] = False
     update.message.reply_text(
         'Please, enter your username.\n'
@@ -84,23 +96,24 @@ def start_authorization(update: Update, context: CallbackContext):
 
 
 def authorize(update: Update, context: CallbackContext):
+    context.user_data[CURRENT_ACTION] = 'authorization'
     return start_authorization(update, context)
 
 
-def stop_authorization(update: Update, context: CallbackContext) -> str:
+def stop_conversation(update: Update, context: CallbackContext) -> str:
     """Completely end conversation from within nested conversation."""
-    update.message.reply_text('Authorization is canceled.\n' + LIST_OF_ALL_COMMANDS)
 
-    return END
+    message = f'{context.user_data[CURRENT_ACTION].capitalize()} is canceled.\n' + LIST_OF_ALL_COMMANDS
+    return end_conversation(update, message=message)
 
 
-def not_auth_commands_interception(update: Update, context: CallbackContext):
-    update.message.reply_text(
+def non_support_commands_interception(update: Update, context: CallbackContext):
+    message = str(
         'Sorry, you had to not use commands.\n'
-        'Aborting authorization.\n'
+        f'{context.user_data[CURRENT_ACTION].capitalize()} is stopped.\n'
         'Use:\n' + LIST_OF_ALL_COMMANDS
     )
-    return END
+    return end_conversation(update, message=message)
 
 
 def authorization_required(func):
@@ -129,12 +142,9 @@ AUTH_HANDLERS = [
             PASSWORD: [MessageHandler(Filters.text & ~Filters.command, adding_password)],
         },
         fallbacks=[
-            CommandHandler('stop', stop_authorization),
-            MessageHandler(Filters.command, not_auth_commands_interception),
+            CommandHandler('stop', stop_conversation),
+            MessageHandler(Filters.command, non_support_commands_interception),
         ],
         allow_reentry=True,
-        map_to_parent={
-            STOPPING: SELECTING_ACTION,
-        },
     ),
 ]

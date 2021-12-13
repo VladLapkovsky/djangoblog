@@ -1,7 +1,8 @@
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler
 
-from tg_bot.handlers.handlers_variables import SELECTING_ACTION, LIST_OF_ALL_COMMANDS
+from tg_bot.handlers.handlers_variables import (CURRENT_ACTION,
+                                                LIST_OF_ALL_COMMANDS)
 
 
 def help_list(update: Update, context: CallbackContext):

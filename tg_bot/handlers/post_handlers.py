@@ -8,7 +8,7 @@ URL = 'http://127.0.0.1:8000/api/posts/'
 
 
 @authorization_required
-def get_posts_count(update: Update, context: CallbackContext):
+def get_posts_count(update: Update, context: CallbackContext) -> None:
     try:
         resp = requests.get(url=URL)
     except requests.exceptions.ConnectionError:

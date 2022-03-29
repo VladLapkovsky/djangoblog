@@ -26,7 +26,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.edit import FormMixin
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import ListCreateAPIView, RetrieveAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveAPIView, RetrieveUpdateAPIView
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.viewsets import GenericViewSet
 
@@ -313,7 +313,7 @@ class PostListView(ListCreateAPIView):
         return serializer.save(slug=get_slug_from_title(new_post.title))
 
 
-class PostDetailView(RetrieveAPIView):
+class PostDetailView(RetrieveUpdateAPIView):
     """Detailed post for everyone."""
 
     queryset = Post.objects.prefetch_related('author', 'comments__author')

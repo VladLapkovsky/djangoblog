@@ -13,10 +13,10 @@ def get_posts_count(update: Update, context: CallbackContext) -> None:
         resp = requests.get(url=URL)
     except requests.exceptions.ConnectionError:
         msg = 'Server is temporarily unavailable.'
-        context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
     else:
         json_resp = resp.json()
         msg = 'Total amount of posts: ' + str(json_resp['count'])
+    finally:
         context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
 
 

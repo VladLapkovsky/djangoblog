@@ -57,7 +57,7 @@
     {% for comment in comments %}
     <div class="comments__container border-top">
         <div class="post__user__info">
-            <a href="/@{{ post.author }}" class="post__user__nickname">
+            <a href="/@{{ comment.author }}" class="post__user__nickname">
                 {{ comment.author }}
             </a>
             <div>
